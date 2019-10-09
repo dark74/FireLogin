@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Hello World!" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="登录" />
+
+    <Button
+        android:id="@+id/btn_upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="上传" />
+
+    <Button
+        android:id="@+id/btn_local_upload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="本地上传" />
+
+    <Button
+        android:id="@+id/btn_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="下载" />
+
+    <Button
+        android:id="@+id/btn_download_local"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="下载至本地" />
+
+    <Button
+        android:id="@+id/btn_download_firebase_ui"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FireBaseUI下载" />
+
+    <Button
+        android:id="@+id/btn_list_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="列出当前目录" />
+
+    <ImageView
+        android:id="@+id/img_cloud"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/about_facebook" />
+
+    <ProgressBar
+        android:id="@+id/progress_upload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </ListView>
+
+</LinearLayout>

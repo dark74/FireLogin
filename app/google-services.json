@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "524340172923",
+    "firebase_url": "https://firelogin-28d3c.firebaseio.com",
+    "project_id": "firelogin-28d3c",
+    "storage_bucket": "firelogin-28d3c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:524340172923:android:aee0430d088c1fb4c62ade",
+        "android_client_info": {
+          "package_name": "com.dk.firelogin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "524340172923-2qs0hpf73q78guep2mtf3281c13rqflf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dk.firelogin",
+            "certificate_hash": "97bf551b27c3cb8487a9e5119423be1769eb277d"
+          }
+        },
+        {
+          "client_id": "524340172923-tbjp820j9rjkiopq4va3md8qstc52dbn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOCYrUbKXbohHRiMIkZZAx6sVLSuLrnSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "524340172923-tbjp820j9rjkiopq4va3md8qstc52dbn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
