@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.dk.firelogin.sp.GlobalSP;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -131,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.i(TAG, "登录成功");
                 // Successfully signed in
                 user = FirebaseAuth.getInstance().getCurrentUser();
+                GlobalSP.getInstance(MainActivity.this);
                 // ...
             } else {
                 // Sign in failed. If response is null the user canceled the
@@ -165,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Log.d(TAG, "点击第" + (position + 1) + "个");
             }
         });
     }
