@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.dk.firelogin.bean.User;
 import com.dk.firelogin.sp.GlobalSP;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
@@ -38,6 +39,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -71,14 +79,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static boolean isPermissionGranted = false;
     private Button btn_list_all;
     private ListView list;
+    private Button btn_real_time_db;
+    private Button btn_real_time_db_read;
+    private Button btn_real_time_db_write;
+    // firebase db
+    private FirebaseDatabase database;
+    List<User> userList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        initDb();
         requestPermission();
         initCloudStorage();
+    }
+
+    private void initDb() {
+        database = FirebaseDatabase.getInstance();
+        userList = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            User user = new User("jack1", (1003+i), 1);
+            userList.add(user);
+        }
     }
 
     private void requestPermission() {
@@ -87,6 +111,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{permissions[i]}, permissionRequestCode);
                 }
+            } else {
+                isPermissionGranted = true;
             }
         }
     }
@@ -170,6 +196,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d(TAG, "点击第" + (position + 1) + "个");
             }
         });
+        btn_real_time_db = (Button) findViewById(R.id.btn_real_time_db_read);
+        btn_real_time_db.setOnClickListener(this);
+        btn_real_time_db_read = (Button) findViewById(R.id.btn_real_time_db_read);
+        btn_real_time_db_read.setOnClickListener(this);
+        btn_real_time_db_write = (Button) findViewById(R.id.btn_real_time_db_write);
+        btn_real_time_db_write.setOnClickListener(this);
     }
 
     @Override
@@ -194,7 +226,106 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_list_all:
                 listAll();
                 break;
+            case R.id.btn_real_time_db_read:
+                testRTDB_read();
+                break;
+            case R.id.btn_real_time_db_write:
+                testRTDB_write();
+                break;
         }
+    }
+
+    private void testRTDB_read() {
+        if (database == null) {
+            Toast.makeText(MainActivity.this, "database未初始化", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "database未初始化" );
+            return;
+        }
+        if (user == null) {
+            Toast.makeText(MainActivity.this, "请先登录", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        DatabaseReference rootRef = database.getReference();
+        rootRef.child("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.i(TAG, "数据库变动- key:"+ dataSnapshot.getKey() + "value:"+dataSnapshot.getValue());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "messages:onCancelled:" + databaseError.getMessage());
+            }
+        });
+        //Query
+        Query baseQuery = rootRef.child("users").child(user.getUid()).orderByKey();
+        baseQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Log.i(TAG, "数据库查询- key:"+ dataSnapshot.getKey() + "value:"+dataSnapshot.getValue());
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Log.i(TAG, "数据库查询- key:"+ dataSnapshot.getKey() + "value:"+dataSnapshot.getValue());
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                Log.i(TAG, "数据库查询- key:"+ dataSnapshot.getKey() + "value:"+dataSnapshot.getValue());
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Log.i(TAG, "数据库查询- key:"+ dataSnapshot.getKey() + "value:"+dataSnapshot.getValue());
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.i(TAG, "数据库查询- msg:"+ databaseError.getMessage() + ",code:"+databaseError.getCode());
+            }
+        });
+
+    }
+
+    private void testRTDB_write() {
+        if (database == null) {
+            Toast.makeText(MainActivity.this, "database未初始化", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "database未初始化" );
+            return;
+        }
+        if (user == null) {
+            Toast.makeText(MainActivity.this, "请先登录", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DatabaseReference rootRef = database.getReference();
+
+        User testUser = new User("tom", 1001, 0);
+        User testUser2 = new User("perks", 1002, 1);
+        userList.add(testUser);
+        userList.add(testUser2);
+
+        rootRef.child("users").child(user.getUid()).setValue(userList)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "写入数据库失败", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "写入数据库失败，E:"+ e.getMessage());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(MainActivity.this, "写入数据库成功", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "写入数据库成功");
+                    }
+                });
+
     }
 
     private void listAll() {
@@ -216,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess(ListResult listResult) {
                 Toast.makeText(MainActivity.this, "列表成功", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "列表成功,list:"+listResult.getItems().size());
+                Log.e(TAG, "列表成功,list:" + listResult.getItems().size());
                 list.setAdapter(new MyListAdapter(listResult.getItems()));
             }
         });
