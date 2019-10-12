@@ -1,5 +1,8 @@
 package com.dk.firelogin.bean;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * author : root
  * date : 19-10-10 下午5:31
@@ -38,5 +41,13 @@ public class User {
 
     public void setSex(int sex) {
         this.sex = sex;
+    }
+
+    public static Map<String, Object> format(User user) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", user.id);
+        map.put("name", user.name);
+        map.put("sex", user.sex);
+        return map;
     }
 }

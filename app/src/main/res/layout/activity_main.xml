@@ -66,6 +66,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="实时数据库_写" />
+    <Button
+        android:id="@+id/btn_real_time_db_update"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="实时数据库_更新" />
+
+    <Button
+        android:id="@+id/btn_real_time_db_read2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="实时数据库_读2" />
 
     <ImageView
         android:id="@+id/img_cloud"
