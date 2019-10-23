@@ -48,6 +48,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
@@ -97,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_real_time_db_update;
     private Button btn_real_time_db_read2;
     private Button btn_firebase_official_login;
+    private Button btn_fire_store_upload;
+    private Button btn_fire_store_download;
+    private Button btn_fire_store_update;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,6 +231,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_real_time_db_read2.setOnClickListener(this);
         btn_firebase_official_login = (Button) findViewById(R.id.btn_firebase_official_login);
         btn_firebase_official_login.setOnClickListener(this);
+        btn_fire_store_upload = (Button) findViewById(R.id.btn_fire_store_upload);
+        btn_fire_store_upload.setOnClickListener(this);
+        btn_fire_store_download = (Button) findViewById(R.id.btn_fire_store_download);
+        btn_fire_store_download.setOnClickListener(this);
+        btn_fire_store_update = (Button) findViewById(R.id.btn_fire_store_update);
+        btn_fire_store_update.setOnClickListener(this);
     }
 
     @Override
@@ -264,7 +276,105 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_firebase_official_login:
                 loginWithMailPwd();
                 break;
+            case R.id.btn_fire_store_upload:
+                fireStoreUpload();
+                break;
+            case R.id.btn_fire_store_download:
+                fireStoreDownload();
+                break;
+            case R.id.btn_fire_store_update:
+                fireStoreUpdate();
+                break;
         }
+    }
+
+    private static final String MODULE_PATH = "cloud_vip";
+    private void fireStoreUpdate() {
+        if (!verifyLogin()) {
+            return;
+        }
+        Map<String, Object> user = new HashMap<>();
+        user.put("uuid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        user.put("expire_date", System.currentTimeMillis());
+        user.put("email", FirebaseAuth.getInstance().getCurrentUser());
+        user.put("mcc", 461);
+        user.put("languages", "cn");
+        //更新之前确保已有数据，先查询是否有数据
+        FirebaseFirestore.getInstance().collection(MODULE_PATH).document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .update("expire_date", System.currentTimeMillis())
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.e(TAG, "更新成功");
+                        } else {
+                            Log.e(TAG, "更新失败");
+                        }
+                    }
+                });
+    }
+
+    private void fireStoreDownload() {
+        if (!verifyLogin()) {
+            return;
+        }
+        DocumentReference rootRef = FirebaseFirestore.getInstance()
+                .collection(MODULE_PATH)
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        rootRef.get().addOnCompleteListener(MainActivity.this, new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    Log.e(TAG, "下载firestore成功");
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        Map<String, Object> resultMap = documentSnapshot.getData();
+                        Iterator<Map.Entry<String, Object>> iterator = resultMap.entrySet().iterator();
+                        while (iterator.hasNext()) {
+                            Map.Entry<String, Object> entry = iterator.next();
+                            Log.i(TAG, "key:" + entry.getKey() + " - value:" + entry.getValue().toString());
+                        }
+                    } else {
+                        Log.e(TAG, "数据不存在");
+                    }
+                } else {
+                    Log.e(TAG, "下载firestore失败:" + task.getException().getMessage());
+                }
+            }
+        });
+    }
+
+    private void fireStoreUpload() {
+        if (!verifyLogin()) {
+            return;
+        }
+        Map<String, Object> user = new HashMap<>();
+        user.put("uuid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        user.put("expire_date", System.currentTimeMillis());
+        user.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        user.put("mcc", 460);
+        user.put("languages", "cn");
+        FirebaseFirestore.getInstance()
+                .collection(MODULE_PATH)
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .set(user)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.e(TAG, "上传成功");
+                        }
+                    }
+                });
+    }
+
+    // 验证数据库是否初始化
+    private static boolean verifyLogin() {
+        // 验证是否登录
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return false;
+        }
+        return true;
     }
 
     private void loginWithMailPwd() {
@@ -310,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 while (iterator.hasNext()) {
                     DataSnapshot next = iterator.next();
                     Object value = next.getValue();
-                    Log.i(TAG, "遍历key："+next.getKey()+"- value:"+next.getValue());
+                    Log.i(TAG, "遍历key：" + next.getKey() + "- value:" + next.getValue());
                 }
                 Log.i(TAG, "数据库变动- key:" + dataSnapshot.getKey() + "value:" + dataSnapshot.getValue());
             }
@@ -404,7 +514,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.d("token", "fail："+e.getMessage());
+                Log.d("token", "fail：" + e.getMessage());
                 e.printStackTrace();
             }
         });
@@ -501,11 +611,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
 
         byte[] data = baos.toByteArray();
-        StorageMetadata storageMetadata = new com.google.firebase.storage.StorageMetadata.Builder().setContentType("image/png")
-                .setCustomMetadata("a","b")
-                .setCustomMetadata("b","c")
+        StorageMetadata storageMetadata = new StorageMetadata.Builder().setContentType("image/png")
+                .setCustomMetadata("a", "b")
+                .setCustomMetadata("b", "c")
                 .build();
-        UploadTask uploadTask = faceBookImgReference.putBytes(data,storageMetadata);//开始上传
+        UploadTask uploadTask = faceBookImgReference.putBytes(data, storageMetadata);//开始上传
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {

@@ -50,6 +50,8 @@ dependencies {
 
     // firebase 实时数据库
     implementation 'com.google.firebase:firebase-database:19.1.0'
+    //firebase firestore
+    implementation 'com.google.firebase:firebase-firestore:20.2.0'
 
     /** AWS**/
     //Base SDK

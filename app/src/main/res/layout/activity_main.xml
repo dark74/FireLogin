@@ -7,102 +7,133 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Hello World!" />
-
-    <Button
-        android:id="@+id/btn_firebase_official_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="邮箱密码登录" />
-
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="登录" />
-
-    <Button
-        android:id="@+id/btn_upload"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="上传" />
-
-    <Button
-        android:id="@+id/btn_local_upload"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="本地上传" />
-
-    <Button
-        android:id="@+id/btn_download"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="下载" />
-
-    <Button
-        android:id="@+id/btn_download_local"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="下载至本地" />
-
-    <Button
-        android:id="@+id/btn_download_firebase_ui"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="FireBaseUI下载" />
-
-    <Button
-        android:id="@+id/btn_list_all"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="列出当前目录" />
-
-    <Button
-        android:id="@+id/btn_real_time_db_read"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="实时数据库_读" />
-    <Button
-        android:id="@+id/btn_real_time_db_write"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="实时数据库_写" />
-    <Button
-        android:id="@+id/btn_real_time_db_update"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="实时数据库_更新" />
-
-    <Button
-        android:id="@+id/btn_real_time_db_read2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="实时数据库_读2" />
-
-    <ImageView
-        android:id="@+id/img_cloud"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@drawable/about_facebook" />
-
-    <ProgressBar
-        android:id="@+id/progress_upload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
-    <ListView
-        android:id="@+id/list"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </ListView>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Hello World!" />
+
+            <Button
+                android:id="@+id/btn_firebase_official_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="邮箱密码登录" />
+
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="登录" />
+
+            <Button
+                android:id="@+id/btn_upload"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="上传" />
+
+            <Button
+                android:id="@+id/btn_local_upload"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="本地上传" />
+
+            <Button
+                android:id="@+id/btn_download"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="下载" />
+
+            <Button
+                android:id="@+id/btn_download_local"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="下载至本地" />
+
+            <Button
+                android:id="@+id/btn_download_firebase_ui"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="FireBaseUI下载" />
+
+            <Button
+                android:id="@+id/btn_fire_store_upload"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="fire_store上传" />
+
+            <Button
+                android:id="@+id/btn_fire_store_download"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="fire_store下载" />
+
+            <Button
+                android:id="@+id/btn_fire_store_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="fire_store更新" />
+
+            <Button
+                android:id="@+id/btn_list_all"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="列出当前目录" />
+
+            <Button
+                android:id="@+id/btn_real_time_db_read"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="实时数据库_读" />
+
+            <Button
+                android:id="@+id/btn_real_time_db_write"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="实时数据库_写" />
+
+            <Button
+                android:id="@+id/btn_real_time_db_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="实时数据库_更新" />
+
+            <Button
+                android:id="@+id/btn_real_time_db_read2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="实时数据库_读2" />
+
+            <ImageView
+                android:id="@+id/img_cloud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/about_facebook" />
+
+            <ProgressBar
+                android:id="@+id/progress_upload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </ListView>
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
