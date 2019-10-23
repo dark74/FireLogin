@@ -40,6 +40,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -51,13 +52,19 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -89,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<User> userList = new ArrayList<>();
     private Button btn_real_time_db_update;
     private Button btn_real_time_db_read2;
+    private Button btn_firebase_official_login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.i(TAG, "登录成功");
                 // Successfully signed in
                 user = FirebaseAuth.getInstance().getCurrentUser();
+
                 GlobalSP.getInstance(MainActivity.this);
                 // ...
             } else {
@@ -214,6 +223,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_real_time_db_update.setOnClickListener(this);
         btn_real_time_db_read2 = (Button) findViewById(R.id.btn_real_time_db_read2);
         btn_real_time_db_read2.setOnClickListener(this);
+        btn_firebase_official_login = (Button) findViewById(R.id.btn_firebase_official_login);
+        btn_firebase_official_login.setOnClickListener(this);
     }
 
     @Override
@@ -250,7 +261,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_real_time_db_read2:
                 testRTDB_read2();
                 break;
+            case R.id.btn_firebase_official_login:
+                loginWithMailPwd();
+                break;
         }
+    }
+
+    private void loginWithMailPwd() {
+        EmailPasswordActivity.startActivity(MainActivity.this);
     }
 
     private void testRTDB_read2() {
@@ -285,9 +303,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void testRTDB_read() {
         if (verifyLoginAndDBinit()) return;
         DatabaseReference rootRef = database.getReference();
-        rootRef.child("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        rootRef.child("users").child(user.getUid()).child("cloud_vip").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
+                while (iterator.hasNext()) {
+                    DataSnapshot next = iterator.next();
+                    Object value = next.getValue();
+                    Log.i(TAG, "遍历key："+next.getKey()+"- value:"+next.getValue());
+                }
                 Log.i(TAG, "数据库变动- key:" + dataSnapshot.getKey() + "value:" + dataSnapshot.getValue());
             }
 
@@ -335,26 +359,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (verifyLoginAndDBinit()) return;
 
         DatabaseReference rootRef = database.getReference();
-
-
-        rootRef.child("users").child(user.getUid()).setValue(userList)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(MainActivity.this, "写入数据库失败", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "写入数据库失败，E:" + e.getMessage());
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(MainActivity.this, "写入数据库成功", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "写入数据库成功");
-                    }
-                });
+        Map<String, String> vipInfoMap = new HashMap<>();
+        vipInfoMap.put("purchaseTime", String.valueOf(System.currentTimeMillis()));
+        vipInfoMap.put("purchaseType", "sub_monthly_cloud_v1");//购买类型productId
+        Calendar calendar = Calendar.getInstance();
+        Date date = new Date(System.currentTimeMillis());
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        Date rollDate = calendar.getTime();
+        vipInfoMap.put("expireTime", String.valueOf(rollDate.getTime()));
+        rootRef.child("users").child(user.getUid()).child("cloud_vip").setValue(vipInfoMap).addOnCompleteListener(MainActivity.this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.e(TAG, "上传成功");
+                } else {
+                    Log.e(TAG, "上传失败");
+                }
+            }
+        });
+//        rootRef.child("users").child(user.getUid()).setValue(userList)
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Toast.makeText(MainActivity.this, "写入数据库失败", Toast.LENGTH_SHORT).show();
+//                        Log.e(TAG, "写入数据库失败，E:" + e.getMessage());
+//                    }
+//                })
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Toast.makeText(MainActivity.this, "写入数据库成功", Toast.LENGTH_SHORT).show();
+//                        Log.e(TAG, "写入数据库成功");
+//                    }
+//                });
     }
 
     private void listAll() {
+        FirebaseAuth.getInstance().getCurrentUser().getIdToken(true).addOnSuccessListener(new OnSuccessListener<GetTokenResult>() {
+            @Override
+            public void onSuccess(GetTokenResult getTokenResult) {
+                Log.d("获取User token", getTokenResult.getToken());
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("token", "fail："+e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+
         StorageReference storageReference = storage.getReference();
         if (user == null) {
             Toast.makeText(MainActivity.this, "请先登录", Toast.LENGTH_SHORT).show();
@@ -438,7 +493,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this, "请先登录", Toast.LENGTH_SHORT).show();
             return;
         }
-        StorageReference faceBookImgReference = storageReference.child("user/" + user.getUid() + "/images/facebook.png");
+        StorageReference faceBookImgReference = storageReference.child("user/" + user.getUid() + "/facebook.png");
         img_cloud.setDrawingCacheEnabled(true);
         img_cloud.buildDrawingCache();
         Bitmap bitmap = ((BitmapDrawable) img_cloud.getDrawable()).getBitmap();
@@ -446,7 +501,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
 
         byte[] data = baos.toByteArray();
-        UploadTask uploadTask = faceBookImgReference.putBytes(data);//开始上传
+        StorageMetadata storageMetadata = new com.google.firebase.storage.StorageMetadata.Builder().setContentType("image/png")
+                .setCustomMetadata("a","b")
+                .setCustomMetadata("b","c")
+                .build();
+        UploadTask uploadTask = faceBookImgReference.putBytes(data,storageMetadata);//开始上传
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
@@ -485,6 +544,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void login() {
         List<AuthUI.IdpConfig> providers = new ArrayList<>();
         providers.add(new AuthUI.IdpConfig.GoogleBuilder().build());
+        providers.add(new AuthUI.IdpConfig.EmailBuilder().build());
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build();
         startActivityForResult(intent, RC_SIGN_IN);
     }
