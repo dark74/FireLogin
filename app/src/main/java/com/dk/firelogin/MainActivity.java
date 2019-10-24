@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,6 +68,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_fire_store_upload;
     private Button btn_fire_store_download;
     private Button btn_fire_store_update;
+    private boolean hasTryLogin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +127,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         for (int i = 0; i < 2; i++) {
             User user = new User("jack1", (1003 + i), 1);
             userList.add(user);
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && !hasTryLogin) {
+            login();
         }
     }
 
@@ -174,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(TAG, "响应requestCode：" + requestCode + ", resultCode:" + resultCode);
         if (requestCode == RC_SIGN_IN) {
+            hasTryLogin = true;
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             if (resultCode == RESULT_OK) {
@@ -299,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         user.put("email", FirebaseAuth.getInstance().getCurrentUser());
         user.put("mcc", 461);
         user.put("languages", "cn");
+        user.put("location", Locale.getDefault().getCountry());
         //更新之前确保已有数据，先查询是否有数据
         FirebaseFirestore.getInstance().collection(MODULE_PATH).document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .update("expire_date", System.currentTimeMillis())
@@ -308,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (task.isSuccessful()) {
                             Log.e(TAG, "更新成功");
                         } else {
-                            Log.e(TAG, "更新失败");
+                            Log.e(TAG, "更新失败:"+task.getException().getMessage());
                         }
                     }
                 });
@@ -343,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
+    //目录结构：projects/firelogin-28d3c/databases/(default)/documents/cloud_vip/OZWWSq1Itmf3dIpMC1rAkD86r6y1
     private void fireStoreUpload() {
         if (!verifyLogin()) {
             return;
@@ -354,6 +367,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         user.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
         user.put("mcc", 460);
         user.put("languages", "cn");
+        user.put("location", Locale.getDefault().getCountry());
+        //TelephonyManager.getSimCountryIso();
         FirebaseFirestore.getInstance()
                 .collection(MODULE_PATH)
                 .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
