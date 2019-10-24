@@ -55,6 +55,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="FireBaseUI下载" />
+    <Button
+        android:id="@+id/btn_list_del"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="删除" />
+
 
     <Button
         android:id="@+id/btn_list_all"

@@ -24,12 +24,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import com.dk.firelogin.bean.User;
 import com.dk.firelogin.sp.GlobalSP;
 import com.firebase.ui.auth.AuthUI;
@@ -67,6 +61,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
     // Choose an arbitrary request code value
@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_real_time_db_update;
     private Button btn_real_time_db_read2;
     private Button btn_firebase_official_login;
+    private Button btn_list_del;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,6 +226,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_real_time_db_read2.setOnClickListener(this);
         btn_firebase_official_login = (Button) findViewById(R.id.btn_firebase_official_login);
         btn_firebase_official_login.setOnClickListener(this);
+        btn_list_del = (Button) findViewById(R.id.btn_list_del);
+        btn_list_del.setOnClickListener(this);
     }
 
     @Override
@@ -264,7 +267,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_firebase_official_login:
                 loginWithMailPwd();
                 break;
+            case R.id.btn_list_del:
+                deleteStorage();
+
+                break;
         }
+    }
+
+    private void deleteStorage() {
+        StorageReference storageReference = storage.getReference();
+        if (user == null) {
+            Toast.makeText(MainActivity.this, "请先登录", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        StorageReference rootRef = storageReference.child("user/" + user.getUid());
+        rootRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.e(TAG, "删除成功");
+                } else {
+                    Log.e(TAG, "删除失败");
+                }
+            }
+        });
     }
 
     private void loginWithMailPwd() {
@@ -310,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 while (iterator.hasNext()) {
                     DataSnapshot next = iterator.next();
                     Object value = next.getValue();
-                    Log.i(TAG, "遍历key："+next.getKey()+"- value:"+next.getValue());
+                    Log.i(TAG, "遍历key：" + next.getKey() + "- value:" + next.getValue());
                 }
                 Log.i(TAG, "数据库变动- key:" + dataSnapshot.getKey() + "value:" + dataSnapshot.getValue());
             }
@@ -404,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.d("token", "fail："+e.getMessage());
+                Log.d("token", "fail：" + e.getMessage());
                 e.printStackTrace();
             }
         });
@@ -501,11 +527,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
 
         byte[] data = baos.toByteArray();
-        StorageMetadata storageMetadata = new com.google.firebase.storage.StorageMetadata.Builder().setContentType("image/png")
-                .setCustomMetadata("a","b")
-                .setCustomMetadata("b","c")
+        StorageMetadata storageMetadata = new StorageMetadata.Builder().setContentType("image/png")
+                .setCustomMetadata("a", "b")
+                .setCustomMetadata("b", "c")
                 .build();
-        UploadTask uploadTask = faceBookImgReference.putBytes(data,storageMetadata);//开始上传
+        UploadTask uploadTask = faceBookImgReference.putBytes(data, storageMetadata);//开始上传
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
